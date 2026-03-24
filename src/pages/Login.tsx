@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithRedirect, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebase';
 import { motion } from 'framer-motion';
 import { Mail, Lock, LogIn, UserPlus, Phone, User } from 'lucide-react';
@@ -21,11 +21,12 @@ const Login: React.FC = () => {
   const handleGoogleLogin = async () => {
     const provider = new GoogleAuthProvider();
     try {
-      await signInWithPopup(auth, provider);
-      navigate('/');
-    } catch (err) {
+      await signInWithRedirect(auth, provider);
+      // Note: navigate('/') will not be called immediately because the page redirects.
+      // The redirect result is handled by the AuthContext's onAuthStateChanged listener.
+    } catch (err: any) {
       console.error(err);
-      setError('Failed to login with Google');
+      setError(err.message || 'Failed to login with Google');
     }
   };
 
