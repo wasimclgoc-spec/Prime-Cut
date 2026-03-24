@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A fresh meat product available in the shop.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string", "enum": ["Mutton", "Beef", "Chicken", "Kleji", "Paye"] },
+        "pricePerKg": { "type": "number" },
+        "image": { "type": "string" },
+        "description": { "type": "string" },
+        "minQty": { "type": "number" },
+        "maxQty": { "type": "number" },
+        "isFeatured": { "type": "boolean" },
+        "stockStatus": { "type": "string", "enum": ["In Stock", "Out of Stock"] }
+      },
+      "required": ["name", "category", "pricePerKg", "image", "minQty", "maxQty"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order for fresh meat.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" }
+            }
+          }
+        },
+        "totalAmount": { "type": "number" },
+        "deliveryFee": { "type": "number" },
+        "status": { "type": "string", "enum": ["Pending", "Confirmed", "Processing", "Out for Delivery", "Delivered", "Cancelled"] },
+        "address": { "type": "string" },
+        "phone": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "paymentMethod": { "type": "string" }
+      },
+      "required": ["userId", "items", "totalAmount", "status", "address", "phone", "createdAt"]
+    },
+    "User": {
+      "title": "User",
+      "description": "A customer or admin user profile.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["customer", "admin"] },
+        "address": { "type": "string" },
+        "phone": { "type": "string" },
+        "wishlist": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A customer review for a product or the shop.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "rating", "comment", "createdAt"]
+    },
+    "Offer": {
+      "title": "Offer",
+      "description": "Promotional offers and banners.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "image": { "type": "string" },
+        "discount": { "type": "string" },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["title", "image", "isActive"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A meat category with a custom display image.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "image": { "type": "string" }
+      },
+      "required": ["name", "image"]
+    }
+  },
+  "firestore": {
+    "/products": { "schema": "Product", "description": "Collection of fresh meat products." },
+    "/orders": { "schema": "Order", "description": "Collection of customer orders." },
+    "/users": { "schema": "User", "description": "Collection of user profiles." },
+    "/reviews": { "schema": "Review", "description": "Collection of customer reviews." },
+    "/offers": { "schema": "Offer", "description": "Collection of promotional offers." },
+    "/categories": { "schema": "Category", "description": "Collection of meat categories with custom images." }
+  }
+}

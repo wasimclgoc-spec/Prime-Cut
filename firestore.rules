@@ -1,0 +1,118 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: products
+    // Document ID: auto-generated
+    // Fields: name, category, pricePerKg, image, description, minQty, maxQty, isFeatured, stockStatus
+    //
+    // Collection: orders
+    // Document ID: auto-generated
+    // Fields: userId, items, totalAmount, deliveryFee, status, address, phone, createdAt, paymentMethod
+    //
+    // Collection: users
+    // Document ID: userId (uid)
+    // Fields: uid, email, displayName, role, address, phone, wishlist
+    //
+    // Collection: reviews
+    // Document ID: auto-generated
+    // Fields: userId, userName, rating, comment, createdAt
+    //
+    // Collection: offers
+    // Document ID: auto-generated
+    // Fields: title, description, image, discount, isActive
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "wasimclgoc@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidProduct(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.category is string && data.category.size() > 0 &&
+             data.pricePerKg is number && data.pricePerKg > 0 &&
+             data.image is string &&
+             data.minQty is number && data.maxQty is number && data.maxQty >= data.minQty;
+    }
+
+    function isValidOrder(data) {
+      return (data.userId == 'guest' || (isAuthenticated() && data.userId == request.auth.uid)) &&
+             (!('customerName' in data) || data.customerName is string) &&
+             data.items is list && data.items.size() > 0 &&
+             data.totalAmount is number && data.totalAmount >= 0 &&
+             data.status in ["Pending", "Confirmed", "Processing", "Out for Delivery", "Delivered", "Cancelled"] &&
+             data.address is string && data.address.size() > 0 &&
+             data.phone is string && data.phone.size() > 0;
+    }
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid == request.auth.uid &&
+             data.email is string &&
+             data.role in ["customer", "admin"];
+    }
+
+    function isValidReview(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
+             data.comment is string && data.comment.size() < 1000;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow read: if true; // Allowed for guest tracking by phone number
+      allow create: if isValidOrder(request.resource.data);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated() && isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
+    }
+
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidReview(request.resource.data);
+      allow update, delete: if isAdmin();
+    }
+
+    match /offers/{offerId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}
