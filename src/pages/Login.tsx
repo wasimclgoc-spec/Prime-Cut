@@ -48,8 +48,8 @@ const Login: React.FC = () => {
     } catch (err: any) {
       console.error(err);
       let message = 'Invalid admin credentials.';
-      if (err.code === 'auth/user-not-found') {
-        message = 'Admin account not found. Please switch to "Sign Up" to create it.';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+        message = "Invalid credentials. If you haven't created your admin account yet, please click 'Register' below.";
       } else if (err.code === 'auth/wrong-password') {
         message = 'Incorrect password.';
       } else if (err.code === 'auth/email-already-in-use') {
@@ -206,6 +206,16 @@ const Login: React.FC = () => {
               <LogIn size={20} />
               <span>{loading ? 'Processing...' : (isLogin ? 'Login as Admin' : 'Register Admin')}</span>
             </button>
+            
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-primary font-bold hover:underline text-sm"
+              >
+                {isLogin ? 'Need to create your admin password? Click here to Register' : 'Already registered? Click here to Login'}
+              </button>
+            </div>
           </form>
         )}
 
