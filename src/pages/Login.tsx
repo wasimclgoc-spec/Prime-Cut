@@ -54,10 +54,12 @@ const Login: React.FC = () => {
         message = 'Incorrect password.';
       } else if (err.code === 'auth/email-already-in-use') {
         message = 'Account already exists. Please switch to "Login".';
+      } else if (err.code === 'auth/operation-not-allowed') {
+        message = 'Email/Password login is not enabled in Firebase. Please enable it in the Firebase Console under Authentication -> Sign-in method.';
       } else if (err.message) {
         message = err.message;
       }
-      setError(message + ' Alternatively, use Google Login with your admin email.');
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -176,7 +178,7 @@ const Login: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-12 pr-6 py-3 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  placeholder="admin@primecuts.com"
+                  placeholder="wasimclgoc@gmail.com"
                 />
               </div>
             </div>
